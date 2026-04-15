@@ -16,7 +16,7 @@ rasterizer (`llvmpipe`), draw into a virtual X11 display (`Xvfb`), and then stre
 display to your Mac via VNC. Your Mac only has to display a stream of pixels — it never
 sees an OpenGL call.
 
-> ⚠️ **Performance warning:** VNC works by continuously capturing and transmitting screenshots of a virtual display, so expect noticeable latency when rotating or zooming 3D views. This is fine for inspecting structures and results, but don't expect native smoothness. A Windows VM via Parallels would perform better, but requires more RAM than my 8 GB Macbook Air can comfortably spare. :(
+> ⚠️ **Performance warning:** VNC works by continuously capturing and transmitting screenshots of a virtual display, so expect noticeable latency when rotating or zooming 3D views. This is fine for inspecting structures and results, but don't expect native smoothness. A Windows VM via Parallels would perform better, but requires much more RAM than my 8 GB Macbook Air can comfortably spare. :(
 
 ## Prerequisites
 
