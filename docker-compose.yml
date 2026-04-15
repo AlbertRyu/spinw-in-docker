@@ -1,0 +1,16 @@
+services:
+  spinw:
+    build: .
+    platform: linux/amd64
+    stdin_open: true
+    tty: true
+    environment:
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - MESA_LOADER_DRIVER_OVERRIDE=swrast
+      - GALLIUM_DRIVER=llvmpipe
+      - QT_X11_NO_MITSHM=1
+      - QT_QPA_PLATFORM=xcb
+    ports:
+      - "5900:5900"
+    volumes:
+      - ./workspace:/workspace
