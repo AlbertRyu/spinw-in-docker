@@ -6,14 +6,17 @@ the window to your Mac via VNC. No XQuartz required.
 ## One-time setup
 
 1. **Install TigerVNC Viewer** on your Mac:
+
    ```bash
    brew install --cask tigervnc-viewer
    ```
 
 2. **Build the Docker image:**
+
    ```bash
    docker compose build
    ```
+
    First build downloads system and Python dependencies (~5-10 min).
    Subsequent builds reuse the apt/pip cache thanks to BuildKit cache mounts.
 
@@ -35,18 +38,8 @@ edit scripts locally in any editor, then run them in the container. Any GUI wind
 
 ## Example
 
-`workspace/test.py`:
-```python
-import signal
-signal.signal(signal.SIGINT, signal.SIG_DFL)  # allow Ctrl+C to kill Qt window
-
-import pyspinw
-s = pyspinw.SpinW()
-# ... define your model ...
-s.view()
-```
-
 Run it:
+
 ```bash
 docker compose exec spinw python3 /workspace/test.py
 ```
@@ -58,6 +51,7 @@ docker compose down
 ```
 
 To force-close a stuck Python viewer without killing the container:
+
 ```bash
 docker compose exec spinw pkill -9 python3
 ```
@@ -93,6 +87,7 @@ Everything OpenGL-related runs inside the container using Mesa's software render
 `Ctrl+\` (SIGQUIT), or run `docker compose exec spinw pkill -9 python3`.
 
 **Rebuild after Dockerfile changes:**
+
 ```bash
 docker compose down
 docker compose build

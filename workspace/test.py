@@ -7,4 +7,6 @@ only_site = LatticeSite(0, 0, 0, 0, 0, -1, name="X")
 
 s = Structure([only_site], unit_cell=unit_cell)
 
-view(s)
+# view(s)
+
+demos()
