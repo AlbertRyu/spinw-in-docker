@@ -9,7 +9,7 @@ the window to your Mac via VNC.
 
 ## What is the current problem on the Mac
 
-spinw's viewer is built on a higher version of **OpenGL**. However, Apple has dropped the support of OpenGL years ago and mac user are stuck with the old version.
+spinw's viewer is built on a higher version of **OpenGL**. However, Apple has dropped the support of OpenGL years ago and mac users are stucked with the old version.
 
 This workaround is to do all the rendering **inside the container** using Mesa's software
 rasterizer (`llvmpipe`), draw into a virtual X11 display (`Xvfb`), and then stream that
