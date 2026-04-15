@@ -1,5 +1,9 @@
 # spinw-python Docker (macOS GUI via VNC)
 
+> ⚠️ **Heads-up:** This is a quick fix put together with the help of Claude Code.
+> It works on my machine (M3 MacBook Air 15"), but there's no guarantee it will
+> work on every MacBook. :)
+
 Runs the spinw-python GUI inside Docker with a virtual X11 display (Xvfb) and streams
 the window to your Mac via VNC.
 
@@ -90,3 +94,35 @@ docker compose exec spinw python3 /workspace/test.py
 ```bash
 docker compose down
 ```
+
+## Updating spinw-python
+
+**Quick (inside the running container, temporary):**
+
+```bash
+docker compose exec spinw pip install --upgrade spinw-python
+```
+
+The upgrade is lost when the container is recreated.
+
+**Permanent (rebuild the image):**
+
+Docker caches the `pip install` layer, so a plain `docker compose build` won't pick up
+a new version. Force the pip step to rerun:
+
+```bash
+docker compose build --no-cache
+```
+
+Thanks to the BuildKit pip cache mount, unchanged packages still come from cache —
+this is much faster than a true fresh build.
+
+**To pin a specific version**, edit the Dockerfile line:
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install spinw-python==0.5.2
+```
+
+Then run `docker compose build` — changing the Dockerfile invalidates that layer
+automatically, no `--no-cache` needed.
