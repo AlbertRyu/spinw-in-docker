@@ -1,50 +1,100 @@
-# spinw-python Docker (macOS GUI via XQuartz)
+# spinw-python Docker (macOS GUI via VNC)
 
-Runs the spinw-python GUI inside Docker and forwards the window to your Mac via X11.
+Runs the spinw-python GUI inside Docker with a virtual X11 display (Xvfb) and streams
+the window to your Mac via VNC. No XQuartz required.
 
 ## One-time setup
 
-1. **Install XQuartz** (the X11 server for macOS):
+1. **Install TigerVNC Viewer** on your Mac:
    ```bash
-   brew install --cask xquartz
+   brew install --cask tigervnc-viewer
    ```
-   Then log out and back in (or reboot) so XQuartz is fully active.
 
-2. **Allow network connections in XQuartz:**
-   Open XQuartz → Preferences → Security → check **"Allow connections from network clients"**
-
-3. **Build the Docker image:**
+2. **Build the Docker image:**
    ```bash
    docker compose build
    ```
+   First build downloads system and Python dependencies (~5-10 min).
+   Subsequent builds reuse the apt/pip cache thanks to BuildKit cache mounts.
 
 ## Usage
 
-Each time you want to use spinw:
-
 ```bash
-# 1. Allow X11 connections from localhost
-xhost + localhost
+# 1. Start the container in the background
+docker compose up -d
 
-# 2. Start an interactive Python session inside the container
-docker compose run spinw python3
+# 2. Open TigerVNC and connect to localhost:5900 (leave password blank)
+
+# 3. Run your scripts inside the container
+docker compose exec spinw python3 /workspace/your_script.py
 ```
 
-Your `./workspace/` folder is mounted at `/workspace` inside the container — put your scripts and data files there.
+Your `./workspace/` folder on the Mac is mounted at `/workspace` inside the container —
+edit scripts locally in any editor, then run them in the container. Any GUI window
+(`view(s)`, `sw.plot()`, etc.) will appear in the TigerVNC window.
 
 ## Example
 
+`workspace/test.py`:
 ```python
->>> import pyspinw
->>> # use spinw normally; GUI windows will appear on your Mac
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)  # allow Ctrl+C to kill Qt window
+
+import pyspinw
+s = pyspinw.SpinW()
+# ... define your model ...
+s.view()
 ```
+
+Run it:
+```bash
+docker compose exec spinw python3 /workspace/test.py
+```
+
+## Stopping
+
+```bash
+docker compose down
+```
+
+To force-close a stuck Python viewer without killing the container:
+```bash
+docker compose exec spinw pkill -9 python3
+```
+
+## How it works
+
+```
+Qt app ──X11──▶ Xvfb ──VNC──▶ TigerVNC on Mac
+         ▲
+         │
+      openbox (X11 window manager)
+```
+
+- **Xvfb** — virtual X11 server running in the container (display `:99`)
+- **openbox** — lightweight X11 window manager (provides title bars and close buttons)
+- **x11vnc** — captures the X11 display and streams it as VNC on port 5900
+- **TigerVNC** on your Mac — receives the VNC stream
+
+Everything OpenGL-related runs inside the container using Mesa's software renderer
+(`llvmpipe`), so no GPU passthrough or XQuartz quirks are involved.
 
 ## Troubleshooting
 
-**`could not connect to display`** — XQuartz is not running or you forgot `xhost + localhost`.
+**`service "spinw" is not running`** — you forgot `docker compose up -d` before `exec`.
 
-**Blank/black window** — `LIBGL_ALWAYS_SOFTWARE=1` forces Mesa's software renderer. If it's already
-set and windows are blank, try adding `LIBGL_DEBUG=verbose` to the environment to see what's failing.
+**TigerVNC asks for a password** — leave it blank and connect.
 
-**`xcb` platform errors** — The xcb Qt platform plugin dependencies are all included in the image.
-If you see a missing `.so`, re-run `docker compose build --no-cache`.
+**Window has no title bar / close button** — openbox didn't start. Check logs with
+`docker compose logs spinw`.
+
+**`Ctrl+C` doesn't close the viewer** — Qt intercepts `SIGINT`. Add
+`signal.signal(signal.SIGINT, signal.SIG_DFL)` to the top of your script, or use
+`Ctrl+\` (SIGQUIT), or run `docker compose exec spinw pkill -9 python3`.
+
+**Rebuild after Dockerfile changes:**
+```bash
+docker compose down
+docker compose build
+docker compose up -d
+```
