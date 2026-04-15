@@ -36,7 +36,19 @@ docker compose version
    brew install --cask tigervnc-viewer
    ```
 
-2. **Build the Docker image:**
+2. **Clone this repository** (or download it as a ZIP and extract it):
+
+   ```bash
+   git clone https://github.com/AlbertRyu/spinw-in-docker.git
+   ```
+
+3. **Enter the repo folder** — all following commands must be run from inside it:
+
+   ```bash
+   cd spinw-in-docker
+   ```
+
+4. **Build the Docker image:**
 
    ```bash
    docker compose build
@@ -63,7 +75,7 @@ docker compose exec spinw python3 /workspace/your_script.py
 
 Your `./workspace/` folder on the Mac is mounted at `/workspace` inside the container —
 edit scripts locally in any editor, then run them in the container. Any GUI window
-(`view(s)`, `sw.plot()`, etc.) will appear in the TigerVNC window.
+such as `view(s)` will appear in the TigerVNC window.
 
 ## Example
 
