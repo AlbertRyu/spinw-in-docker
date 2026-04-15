@@ -7,6 +7,20 @@
 Runs the spinw-python GUI inside Docker with a virtual X11 display (Xvfb) and streams
 the window to your Mac via VNC.
 
+## What is the current problem on the Mac
+
+spinw's viewer is built on a higher version of **OpenGL**. However, Apple has dropped the support of OpenGL years ago and mac user are stuck with the old version.
+
+This workaround is to do all the rendering **inside the container** using Mesa's software
+rasterizer (`llvmpipe`), draw into a virtual X11 display (`Xvfb`), and then stream that
+display to your Mac via VNC. Your Mac only has to display a stream of pixels — it never
+sees an OpenGL call.
+
+> ⚠️ **Performance warning:** VNC is essentially "take a screenshot of the virtual screen
+> and send it over". This is much slower than a native GUI — expect **noticeable latency**
+> when rotating/zooming 3D views, and generally lower frame rates. It's fine for
+> inspecting structures and results, but don't expect native-app smoothness.
+
 ## Prerequisites
 
 You need **Docker** running on your Mac. Two options:
