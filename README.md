@@ -3,6 +3,26 @@
 Runs the spinw-python GUI inside Docker with a virtual X11 display (Xvfb) and streams
 the window to your Mac via VNC. No XQuartz required.
 
+## Prerequisites
+
+You need **Docker** running on your Mac. Two options:
+
+- **OrbStack** (recommended on Apple Silicon — faster, lighter, free for personal use):
+  ```bash
+  brew install --cask orbstack
+  ```
+- **Docker Desktop** (official):
+  ```bash
+  brew install --cask docker
+  ```
+  Then open Docker Desktop from Applications once to finish setup.
+
+Verify it works:
+```bash
+docker --version
+docker compose version
+```
+
 ## One-time setup
 
 1. **Install TigerVNC Viewer** on your Mac:
@@ -22,9 +42,13 @@ the window to your Mac via VNC. No XQuartz required.
 
 ## Usage
 
+> **Important:** Run the container in **attached mode** (`docker compose up`, no `-d`).
+> The container's main process is an interactive Python shell, which exits immediately
+> if no terminal is attached. Open a second terminal for `docker compose exec` commands.
+
 ```bash
-# 1. Start the container in the background
-docker compose up -d
+# 1. Start the container (attached — keeps Python REPL alive)
+docker compose up
 
 # 2. Open TigerVNC and connect to localhost:5900 (leave password blank)
 
@@ -86,10 +110,15 @@ Everything OpenGL-related runs inside the container using Mesa's software render
 `signal.signal(signal.SIGINT, signal.SIG_DFL)` to the top of your script, or use
 `Ctrl+\` (SIGQUIT), or run `docker compose exec spinw pkill -9 python3`.
 
+**Container exits immediately** — you used `docker compose up -d` (detached). Don't.
+The container's main process is an interactive Python shell, which has no terminal
+attached in detached mode and exits right away. Run `docker compose up` (without `-d`)
+in one terminal, and use a second terminal for `docker compose exec` commands.
+
 **Rebuild after Dockerfile changes:**
 
 ```bash
 docker compose down
 docker compose build
-docker compose up -d
+docker compose up
 ```
